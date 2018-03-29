@@ -4,43 +4,12 @@ using namespace std;
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <Eigen/Cholesky>
 
-#define Matrix_SIZE 50
+#define Matrix_SIZE 100
 
 int main( int argc, char** argv )
 {
-    //The Matrix class
-    Eigen::Matrix<float, 2, 3> matrix_23; //声明2×3float矩阵
-    Eigen::Vector3d v_3d;
-    Eigen::Matrix3d matrix_33 = Eigen::Matrix3d::Zero();
-    Eigen::Matrix< double , Eigen::Dynamic, Eigen::Dynamic > matrix_dynamic;
-    Eigen::MatrixXd matrix_x;
-
-    //输入输出数据
-    matrix_23 << 1,2,3,4,5,6;
-    cout << matrix_23 << endl;
-
-    //用（）访问矩阵中的元素
-    for (int i = 0; i < 1; ++i) {
-        for (int j = 0; j < 2; ++j) {
-            cout << matrix_23(i,j) << endl;
-        }
-    }
-
-    v_3d << 3,2,1;
-    //矩阵向量相乘，先做显式转换
-    Eigen::Matrix < double, 2, 1 > result = matrix_23 . cast<double>() * v_3d;
-    cout << result << endl;
-
-    matrix_33 = Eigen::MatrixXd::Random();
-    cout << matrix_33 << endl ;
-
-    cout << matrix_33.transpose() << endl;
-    cout << matrix_33.sum() << endl;
-    cout << matrix_33.trace() << endl;
-    cout << 10*matrix_33 << endl;
-    cout << matrix_33.inverse() << endl;
-    cout << matrix_33.determinant() << endl;
 
     //解方程
     Eigen::Matrix < double, Matrix_SIZE, Matrix_SIZE > matrix_NN;
@@ -57,7 +26,20 @@ int main( int argc, char** argv )
     //QR分解
     time_stt = clock();
     x = matrix_NN.colPivHouseholderQr().solve(v_Nd);
-    cout << "time use in QR composition inverse is " <<1000* (clock() - time_stt)/(double)CLOCKS_PER_SEC << "ms" << endl;
+    //cout << "The x is " << endl << x << endl;
+    cout << "time use in QR composition  is " <<1000* (clock() - time_stt)/(double)CLOCKS_PER_SEC << "ms" << endl;
+
+    //cholesky分解
+    //Eigen::MatrixXd A(3,3);
+    //A << 4,-1,2, -1,6,0, 2,0,5;
+    //cout << "The matrix A is" << endl << A << endl;
+    Eigen::LLT< Eigen::MatrixXd > lltOfA(matrix_NN); // compute the Cholesky decomposition of A
+    Eigen::MatrixXd L = lltOfA.matrixL(); // retrieve factor L  in the decomposition
+// The previous two lines can also be written as "L = A.llt().matrixL()"
+    cout << "The Cholesky factor L is" << endl << L << endl;
+    cout << "To check this, let us compute L * L.transpose()" << endl;
+    cout << L * L.transpose() << endl;
+    cout << "This should equal the matrix A" << endl;
 
     return 0;
 
